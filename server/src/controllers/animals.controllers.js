@@ -47,7 +47,7 @@ export const createAnimal = async (req, res) => {
     const savedAnimal = await newAnimal.save();
     res.status(200).json(savedAnimal);
   } catch (e) {
-    res.json(e.message);
+    return res.json(e.message);
   }
 };
 
