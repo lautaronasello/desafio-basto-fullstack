@@ -41,6 +41,7 @@ export const createAnimal = async (req, res) => {
     device: req.body.device.toUpperCase(),
     type: typeAnimalFormatted,
   };
+
   try {
     const newAnimal = new Animal(requestBody);
     const savedAnimal = await newAnimal.save();
