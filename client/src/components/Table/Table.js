@@ -15,17 +15,6 @@ import TablePaginationActions from './TablePaginationActions';
 import moment from 'moment';
 import TableHeadComponent from './TableHeadComponent';
 
-const StyledTableCell = styled(TableCell)(() => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: [theme.palette.custom.main],
-    color: '#212121',
-    fontWeight: '700',
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
-}));
-
 export default function GeneralTable(props) {
   const {
     rows,
@@ -38,6 +27,7 @@ export default function GeneralTable(props) {
     handleRequestSort,
     order,
     orderBy,
+    totalRows,
   } = props;
 
   const CustomIcon = (row, icons) => {
@@ -52,7 +42,7 @@ export default function GeneralTable(props) {
             <IconButton
               key={item.id}
               onClick={(e) => {
-                item.function(e, row);
+                item.function(e, item, row);
               }}
               style={{ color: `${item.color}` }}
               disabled={row['editable']}
@@ -67,7 +57,7 @@ export default function GeneralTable(props) {
 
   return (
     <>
-      <TableContainer>
+      <TableContainer sx={{ maxHeight: '50vh' }}>
         <Table stickyHeader sx={{ minWidth: 700 }}>
           <TableHeadComponent
             order={order}
@@ -101,9 +91,9 @@ export default function GeneralTable(props) {
         </Table>
       </TableContainer>
       <TablePagination
-        rowsPerPageOptions={[25, 50, 100, 200, 500]}
+        rowsPerPageOptions={[5, 10, 25, 50]}
         labelRowsPerPage='Filas por pagina:'
-        count={isSlice.length}
+        count={totalRows}
         component='div'
         rowsPerPage={rowsPerPage}
         page={page}

@@ -1,19 +1,40 @@
-import { Button, Grid, Stack, TextField, Typography } from '@mui/material';
+import {
+  Alert,
+  Button,
+  Grid,
+  Snackbar,
+  snackbarClasses,
+  Stack,
+  TextField,
+  Typography,
+} from '@mui/material';
 import React, { useEffect, useState } from 'react';
+import AlertDialogComponent from '../../components/AlertDialogComponent/AlertDialogComponent';
 import Header from '../../components/Header/Header';
 import GeneralTable from '../../components/Table/Table';
-import CustomizedTables from '../../components/Table/Table';
-import { getAnimales } from '../../services/animals';
+import { deleteAnimalById, getAnimales } from '../../services/animals';
 
 export default function Home() {
   const [searchText, setSearchText] = useState('');
   const [filters, setFilters] = useState({
     page: 0,
-    rowsPerPage: 25,
+    rowsPerPage: 5,
     orderBy: null,
     order: 'desc',
   });
   const [data, setData] = useState([]);
+  const [totalRows, setTotalRows] = useState(0);
+  const [dialogConfig, setDialogConfig] = useState({
+    title: null,
+    secondaryText: null,
+    handleConfirmAccionDialog: null,
+    row: null,
+  });
+  const [snackbar, setSnackbar] = useState({
+    time: null,
+    message: null,
+    severity: null,
+  });
 
   useEffect(() => {
     let isMounted = true;
@@ -34,9 +55,43 @@ export default function Home() {
     };
     try {
       const res = await getAnimales(body, filters.orderBy, filters.order);
-      setData(res.data.data);
+      setData(res.data.rows);
+      setTotalRows(res.data.totalRows);
     } catch (e) {
       console.log(e);
+    }
+  };
+
+  const handleOpenDialog = (e, item, row) => {
+    setDialogConfig({
+      title: item.title,
+      secondaryText: item.secondaryText,
+      handleConfirmAccionDialog: item.dialogFunction,
+      row: row,
+    });
+  };
+
+  const handleDeleteItem = async (id) => {
+    try {
+      await deleteAnimalById(id);
+      setDialogConfig({
+        title: null,
+        secondaryText: null,
+        handleConfirmAccionDialog: null,
+        row: null,
+      });
+      await handleGetData(filters);
+      setSnackbar({
+        time: 3000,
+        message: 'El item se elimino con exito',
+        severity: 'success',
+      });
+    } catch (e) {
+      setSnackbar({
+        time: 3000,
+        message: e.message,
+        severity: 'error',
+      });
     }
   };
 
@@ -94,7 +149,7 @@ export default function Home() {
           id: 1,
           label: 'Editar',
           name: 'FiEdit',
-          function: null,
+          function: handleOpenDialog,
           type: 'fi',
           color: '#aec46e',
         },
@@ -102,9 +157,12 @@ export default function Home() {
           id: 2,
           label: 'Borrar',
           name: 'Delete',
-          function: null,
+          function: handleOpenDialog,
           type: 'mui',
           color: '#d3455b',
+          title: '¿Estás seguro de eliminar este item?',
+          secondaryText: 'Esta acción eliminará el item de forma permanente',
+          dialogFunction: handleDeleteItem,
         },
       ],
     },
@@ -150,57 +208,95 @@ export default function Home() {
         )
       : data;
 
+  const handleCloseSnackbar = () => {
+    setSnackbar({ time: null, message: null, severity: null });
+  };
+
+  const handleCloseDialog = () => {
+    setDialogConfig({
+      title: null,
+      secondaryText: null,
+      handleConfirmAccionDialog: null,
+      row: null,
+    });
+  };
+
   return (
-    <Grid container spacing={10}>
-      <Grid item xs={12} justifyContent='start'>
-        <Header
-          path='Home'
-          title=' Administración Ganadera'
-          btnLabel='Crear nueva entrada'
-          handleClickBtn={null}
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <Stack direction='column' spacing={2}>
-          <Typography variant='h5' component='div'>
-            Nombre/Número de registro
-          </Typography>
-          <Stack direction='row' spacing={2}>
-            <TextField
-              id='search-bar'
-              label='Nombre/Número de registro'
-              sx={{ width: '60%' }}
-              size='small'
-              value={searchText}
-              onChange={handleChangeSearch}
-            />
-            <Button
-              color='primary'
-              variant='contained'
-              onClick={handleClickSearch}
-            >
-              Buscar
-            </Button>
-          </Stack>
-        </Stack>
-      </Grid>
-      <Grid item xs={12}>
-        <Stack direction='column' spacing={3}>
-          <Typography variant='h5' component='div'>
-            Lista de animales
-          </Typography>
-          <GeneralTable
-            rows={data}
-            isSlice={isSlice}
-            columns={columns}
-            rowsPerPage={filters.rowsPerPage}
-            page={filters.page}
-            handleChangePage={handleChangePage}
-            handleChangeRowsPerPage={handleChangeRowsPerPage}
-            handleRequestSort={handleRequestSort}
+    <>
+      <Grid container spacing={10}>
+        <Grid item xs={12} justifyContent='start'>
+          <Header
+            path='Home'
+            title=' Administración Ganadera'
+            btnLabel='Crear nueva entrada'
+            handleClickBtn={null}
           />
-        </Stack>
+        </Grid>
+        <Grid item xs={12}>
+          <Stack direction='column' spacing={2}>
+            <Typography variant='h5' component='div'>
+              Nombre/Número de registro
+            </Typography>
+            <Stack direction='row' spacing={2}>
+              <TextField
+                id='search-bar'
+                label='Nombre/Número de registro'
+                sx={{ width: '60%' }}
+                size='small'
+                value={searchText}
+                onChange={handleChangeSearch}
+              />
+              <Button
+                color='primary'
+                variant='contained'
+                onClick={handleClickSearch}
+              >
+                Buscar
+              </Button>
+            </Stack>
+          </Stack>
+        </Grid>
+        <Grid item xs={12}>
+          <Stack direction='column' spacing={3}>
+            <Typography variant='h5' component='div'>
+              Lista de animales
+            </Typography>
+            <GeneralTable
+              rows={data}
+              isSlice={data}
+              columns={columns}
+              rowsPerPage={filters.rowsPerPage}
+              page={filters.page}
+              handleChangePage={handleChangePage}
+              handleChangeRowsPerPage={handleChangeRowsPerPage}
+              handleRequestSort={handleRequestSort}
+              totalRows={totalRows}
+            />
+          </Stack>
+        </Grid>
       </Grid>
-    </Grid>
+      {snackbar.message !== null && (
+        <Snackbar
+          open={snackbar.message !== null}
+          autoHideDuration={snackbar.time}
+          onClose={handleCloseSnackbar}
+        >
+          <Alert
+            onClose={handleCloseSnackbar}
+            severity={snackbar.severity}
+            sx={{ width: '100%' }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
+      )}
+      <AlertDialogComponent
+        handleConfirmAccionDialog={dialogConfig.handleConfirmAccionDialog}
+        title={dialogConfig.title}
+        secondaryText={dialogConfig.secondaryText}
+        handleClose={handleCloseDialog}
+        row={dialogConfig.row}
+      />
+    </>
   );
 }

@@ -5,11 +5,13 @@ import {
   editAnimals,
   getAnimalById,
   getAnimals,
+  getAnimalSearch,
 } from '../controllers/animals.controllers.js';
 
 const router = Router();
 
 router.post('/animal', getAnimals);
+router.post('/animal/search', getAnimalSearch);
 router.get('/animal/:id', getAnimalById);
 router.post('/animal/create', createAnimal);
 router.put('/animal/:id', editAnimals);

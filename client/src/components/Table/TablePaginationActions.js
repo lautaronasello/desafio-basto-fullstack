@@ -3,14 +3,14 @@ import React from 'react';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 export default function TablePaginationActions(props) {
-  const { count, rowsPerPage, handleChangePage, page } = props;
+  const { count, rowsPerPage, onPageChange, page } = props;
   const theme = useTheme();
   const handleBackButtonClick = (event) => {
-    handleChangePage(event, page - 1);
+    onPageChange(event, page - 1);
   };
 
   const handleNextButtonClick = (event) => {
-    handleChangePage(event, page + 1);
+    onPageChange(event, page + 1);
   };
 
   return (
