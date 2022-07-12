@@ -1,24 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import { Box, ThemeProvider } from '@mui/material';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import { theme } from './utils/theme';
+import Home from './views/Home/Home';
+import Layout from './views/Layout/Layout';
+import Management from './views/Management/Management';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Routes>
+        <Route path='/' element={<Layout />}>
+          <Route path='admin/home' element={<Home />} />
+          <Route path='admin/management' element={<Management />} />
+          <Route path='*' element={<Navigate to='/admin/home' replace />} />
+        </Route>
+      </Routes>
+    </ThemeProvider>
   );
 }
 
