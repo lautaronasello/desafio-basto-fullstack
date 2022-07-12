@@ -1,10 +1,137 @@
 import { Button, Grid, Stack, TextField, Typography } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../../components/Header/Header';
+import GeneralTable from '../../components/Table/Table';
 import CustomizedTables from '../../components/Table/Table';
+import { getAnimales } from '../../services/animals';
 
 export default function Home() {
   const [searchText, setSearchText] = useState('');
+  const [filters, setFilters] = useState({
+    page: 0,
+    rowsPerPage: 25,
+    orderBy: null,
+    order: 'desc',
+  });
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (isMounted) {
+      handleGetData(filters);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [filters]);
+
+  const handleGetData = async (filters) => {
+    const body = {
+      page: filters.page,
+      rowsPerPage: filters.rowsPerPage,
+    };
+    try {
+      const res = await getAnimales(body, filters.orderBy, filters.order);
+      setData(res.data.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const columns = [
+    {
+      id: 'id_senasa',
+      label: 'ID Senasa',
+      minWidth: 40,
+      align: 'center',
+    },
+    {
+      id: 'type',
+      label: 'Tipo Animal',
+      minWidth: 150,
+      align: 'center',
+    },
+    {
+      id: 'weight',
+      label: 'Peso (kg)',
+      minWidth: 40,
+      align: 'center',
+    },
+    {
+      id: 'name',
+      label: 'Nombre',
+      minWidth: 40,
+      align: 'center',
+    },
+    {
+      id: 'device',
+      label: 'Dispositivo',
+      minWidth: 40,
+      align: 'center',
+    },
+    {
+      id: 'device_number',
+      label: 'N° Dispositivo',
+      minWidth: 40,
+      align: 'center',
+    },
+    {
+      id: 'createdAt',
+      label: 'Fecha Creacion',
+      minWidth: 40,
+      align: 'center',
+    },
+    {
+      id: 'actions',
+      label: '',
+      minWidth: 100,
+      align: 'left',
+      sortable: false,
+      icons: [
+        {
+          id: 1,
+          label: 'Editar',
+          name: 'FiEdit',
+          function: null,
+          type: 'fi',
+          color: '#aec46e',
+        },
+        {
+          id: 2,
+          label: 'Borrar',
+          name: 'Delete',
+          function: null,
+          type: 'mui',
+          color: '#d3455b',
+        },
+      ],
+    },
+  ];
+
+  const handleRequestSort = (event, property) => {
+    const isAsc = filters.orderBy === property && filters.order === 'asc';
+    setFilters((prevState) => {
+      return { ...prevState, order: isAsc ? 'desc' : 'asc', orderBy: property };
+    });
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setFilters((prevState) => {
+      return { ...prevState, page: newPage };
+    });
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setFilters((prevState) => {
+      return {
+        ...prevState,
+        page: 0,
+        rowsPerPage: parseInt(event.target.value, 10),
+      };
+    });
+  };
 
   const handleChangeSearch = (e) => {
     setSearchText(e.target.value);
@@ -15,17 +142,13 @@ export default function Home() {
     setSearchText('');
   };
 
-  function createData(name, calories, fat, carbs, protein) {
-    return { name, calories, fat, carbs, protein };
-  }
-
-  const rows = [
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData('Eclair', 262, 16.0, 24, 6.0),
-    createData('Cupcake', 305, 3.7, 67, 4.3),
-    createData('Gingerbread', 356, 16.0, 49, 3.9),
-  ];
+  const isSlice =
+    filters.rowsPerPage > 0
+      ? data.slice(
+          filters.page * filters.rowsPerPage,
+          filters.page * filters.rowsPerPage + filters.rowsPerPage
+        )
+      : data;
 
   return (
     <Grid container spacing={10}>
@@ -66,7 +189,16 @@ export default function Home() {
           <Typography variant='h5' component='div'>
             Lista de animales
           </Typography>
-          <CustomizedTables />
+          <GeneralTable
+            rows={data}
+            isSlice={isSlice}
+            columns={columns}
+            rowsPerPage={filters.rowsPerPage}
+            page={filters.page}
+            handleChangePage={handleChangePage}
+            handleChangeRowsPerPage={handleChangeRowsPerPage}
+            handleRequestSort={handleRequestSort}
+          />
         </Stack>
       </Grid>
     </Grid>

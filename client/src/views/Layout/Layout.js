@@ -29,7 +29,8 @@ export default function Layout() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            minHeight: '90vh',
+            minHeight: '70vh',
+            my: '3rem',
           }}
         >
           <Outlet />

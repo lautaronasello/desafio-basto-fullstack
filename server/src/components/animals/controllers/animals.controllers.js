@@ -1,4 +1,4 @@
-import Animal from '../schemas/animal.schema.js';
+import Animal from '../../../database/schemas/animal.schema.js';
 
 export const getAnimals = async (req, res) => {
   const { page, rowsPerPage, orderBy, order } = req.body;
@@ -32,6 +32,7 @@ export const getAnimals = async (req, res) => {
     res.json(e.message);
   }
 };
+
 export const createAnimal = async (req, res) => {
   const typeAnimal = req.body.type;
   const typeAnimalFormatted =

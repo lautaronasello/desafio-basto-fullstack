@@ -6,8 +6,14 @@ import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
 import { theme } from '../../utils/theme';
+import * as IconFi from 'react-icons/fi';
+import * as IconMui from '@mui/icons-material';
+
+import { IconButton, TablePagination, Tooltip } from '@mui/material';
+import TablePaginationActions from './TablePaginationActions';
+import moment from 'moment';
+import TableHeadComponent from './TableHeadComponent';
 
 const StyledTableCell = styled(TableCell)(() => ({
   [`&.${tableCellClasses.head}`]: {
@@ -20,54 +26,100 @@ const StyledTableCell = styled(TableCell)(() => ({
   },
 }));
 
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  backgroundColor: theme.palette.custom.main,
+export default function GeneralTable(props) {
+  const {
+    rows,
+    isSlice,
+    columns,
+    rowsPerPage,
+    page,
+    handleChangePage,
+    handleChangeRowsPerPage,
+    handleRequestSort,
+    order,
+    orderBy,
+  } = props;
 
-  // hide last border
-  '&:last-child td, &:last-child th': {
-    border: 0,
-  },
-}));
+  const CustomIcon = (row, icons) => {
+    return (
+      <>
+        {icons.map((item) => {
+          const IconC =
+            item.type === 'mui'
+              ? IconMui[`${item.name}`]
+              : IconFi[`${item.name}`];
+          return (
+            <IconButton
+              key={item.id}
+              onClick={(e) => {
+                item.function(e, row);
+              }}
+              style={{ color: `${item.color}` }}
+              disabled={row['editable']}
+            >
+              <IconC />
+            </IconButton>
+          );
+        })}
+      </>
+    );
+  };
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-];
-
-export default function CustomizedTables() {
   return (
-    <TableContainer>
-      <Table sx={{ minWidth: 700 }} aria-label='customized table'>
-        <TableHead>
-          <TableRow>
-            <StyledTableCell>Dessert (100g serving)</StyledTableCell>
-            <StyledTableCell align='right'>Calories</StyledTableCell>
-            <StyledTableCell align='right'>Fat&nbsp;(g)</StyledTableCell>
-            <StyledTableCell align='right'>Carbs&nbsp;(g)</StyledTableCell>
-            <StyledTableCell align='right'>Protein&nbsp;(g)</StyledTableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <StyledTableRow key={row.name}>
-              <StyledTableCell component='th' scope='row'>
-                {row.name}
-              </StyledTableCell>
-              <StyledTableCell align='right'>{row.calories}</StyledTableCell>
-              <StyledTableCell align='right'>{row.fat}</StyledTableCell>
-              <StyledTableCell align='right'>{row.carbs}</StyledTableCell>
-              <StyledTableCell align='right'>{row.protein}</StyledTableCell>
-            </StyledTableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <>
+      <TableContainer>
+        <Table stickyHeader sx={{ minWidth: 700 }}>
+          <TableHeadComponent
+            order={order}
+            orderBy={orderBy}
+            onRequestSort={handleRequestSort}
+            columns={columns}
+          />
+          <TableBody>
+            {rows &&
+              isSlice.map((row) => {
+                return (
+                  <>
+                    <TableRow key={row._id}>
+                      {columns.map((column) => {
+                        const value = row[column.id];
+                        return (
+                          <TableCell key={column.id}>
+                            {column.id === 'actions'
+                              ? CustomIcon(row, column.icons)
+                              : column.id === 'createdAt'
+                              ? moment(value).format('DD/MM/YYYY HH:mm:ss')
+                              : value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  </>
+                );
+              })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <TablePagination
+        rowsPerPageOptions={[25, 50, 100, 200, 500]}
+        labelRowsPerPage='Filas por pagina:'
+        count={isSlice.length}
+        component='div'
+        rowsPerPage={rowsPerPage}
+        page={page}
+        labelDisplayedRows={({ from, to, count }) => {
+          return '' + from + '-' + to + ' de ' + count;
+        }}
+        SelectProps={{
+          inputProps: {
+            'aria-label': 'Filas por página',
+          },
+          native: true,
+        }}
+        onPageChange={handleChangePage}
+        onRowsPerPageChange={handleChangeRowsPerPage}
+        ActionsComponent={TablePaginationActions}
+      />
+    </>
   );
 }
