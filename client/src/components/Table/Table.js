@@ -18,7 +18,6 @@ import TableHeadComponent from './TableHeadComponent';
 export default function GeneralTable(props) {
   const {
     rows,
-    isSlice,
     columns,
     rowsPerPage,
     page,
@@ -67,24 +66,22 @@ export default function GeneralTable(props) {
           />
           <TableBody>
             {rows &&
-              isSlice.map((row) => {
+              rows.map((row) => {
                 return (
-                  <>
-                    <TableRow key={row._id}>
-                      {columns.map((column) => {
-                        const value = row[column.id];
-                        return (
-                          <TableCell key={column.id}>
-                            {column.id === 'actions'
-                              ? CustomIcon(row, column.icons)
-                              : column.id === 'createdAt'
-                              ? moment(value).format('DD/MM/YYYY HH:mm:ss')
-                              : value}
-                          </TableCell>
-                        );
-                      })}
-                    </TableRow>
-                  </>
+                  <TableRow key={row._id}>
+                    {columns.map((column) => {
+                      const value = row[column.id];
+                      return (
+                        <TableCell key={column.id}>
+                          {column.id === 'actions'
+                            ? CustomIcon(row, column.icons)
+                            : column.id === 'createdAt'
+                            ? moment(value).format('DD/MM/YYYY HH:mm:ss')
+                            : value}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
                 );
               })}
           </TableBody>

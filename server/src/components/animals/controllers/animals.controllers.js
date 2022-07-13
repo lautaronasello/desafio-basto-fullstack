@@ -16,8 +16,9 @@ export const getAnimals = async (req, res) => {
       .sort(sort)
       .skip(page * rowsPerPage)
       .limit(rowsPerPage);
-    console.log(page * rowsPerPage, rowsPerPage);
+
     const totalAnimals = await Animal.find();
+
     const response = {
       rowsPerPage,
       page: page + 1,
@@ -74,19 +75,27 @@ export const deleteAnimal = async (req, res) => {
   }
 };
 
-export const editAnimals = async (req, res) => {
+export const editAnimals = async (req, res, next) => {
   try {
-    const updatedAnimal = await Animal.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-      }
-    );
-    if (!updatedAnimal) return res.status(204).json();
-    res.status(200).json(updatedAnimal);
+    if (
+      req.body.id_senasa.length !== 16 ||
+      req.body.device_number.length !== 8 ||
+      req.body.name.length > 200
+    ) {
+      throw new Error('Error validación cantidad de caracteres');
+    } else {
+      const updatedAnimal = await Animal.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+        }
+      );
+      if (!updatedAnimal) return res.status(204).json();
+      res.status(200).json(updatedAnimal);
+    }
   } catch (e) {
-    res.json(e);
+    res.json(e.message);
   }
 };
 export const getAnimalById = async (req, res) => {
@@ -100,9 +109,13 @@ export const getAnimalById = async (req, res) => {
 };
 
 export const getAnimalSearch = async (req, res) => {
-  const search = req.body.search;
+  const search = req.body.body;
+  console.log(search);
   try {
-    const requestedAnimal = await Animal.find({ $text: { $search: search } });
+    const requestedAnimal = await Animal.find(
+      { $text: { $search: search } },
+      { score: { $meta: 'textScore' } }
+    );
     if (!requestedAnimal) return res.status(204).json([]);
     res.status(200).json(requestedAnimal);
   } catch (e) {

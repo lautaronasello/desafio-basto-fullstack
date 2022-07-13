@@ -71,6 +71,6 @@ animalSchema.methods.toJSON = function () {
   delete obj.is_active;
   return obj;
 };
-animalSchema.index({ '$**': 'text' });
+animalSchema.index({ '$**': 'text' }, { name: 'textScore' });
 
 export default model('Animal', animalSchema);

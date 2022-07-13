@@ -11,8 +11,16 @@ import {
 import React, { useEffect, useState } from 'react';
 import AlertDialogComponent from '../../components/AlertDialogComponent/AlertDialogComponent';
 import Header from '../../components/Header/Header';
+import ModalComponentAction from '../../components/Modals/ModalComponentAction';
 import GeneralTable from '../../components/Table/Table';
-import { deleteAnimalById, getAnimales } from '../../services/animals';
+import {
+  createAnimal,
+  deleteAnimalById,
+  editAnimalById,
+  getAnimalById,
+  getAnimales,
+  getAnimalSearch,
+} from '../../services/animals';
 
 export default function Home() {
   const [searchText, setSearchText] = useState('');
@@ -34,6 +42,20 @@ export default function Home() {
     time: null,
     message: null,
     severity: null,
+  });
+  const [modalAction, setModalAction] = useState({
+    titleModalAction: null,
+    handleClickConfirmAction: null,
+    rowID: null,
+  });
+  const [textForm, setTextForm] = useState({
+    id_senasa: null,
+    type: '',
+    weight: null,
+    name: null,
+    device: '',
+    device_number: null,
+    createdAt: null,
   });
 
   useEffect(() => {
@@ -95,6 +117,52 @@ export default function Home() {
     }
   };
 
+  const handleConfirmEdit = async (rowID, body) => {
+    try {
+      await editAnimalById(rowID, body);
+      await handleGetData(filters);
+      setSnackbar({
+        time: 3000,
+        message: 'El item se editó con éxito',
+        severity: 'success',
+      });
+      handleCloseAction();
+    } catch (e) {
+      setSnackbar({
+        time: 3000,
+        message: e.message,
+        severity: 'error',
+      });
+    }
+  };
+
+  const handleClickEdit = async (e, item, row) => {
+    try {
+      const res = await getAnimalById(row._id);
+      setTextForm({
+        id_senasa: res.data.id_senasa,
+        type: res.data.type,
+        weight: res.data.weight,
+        name: res.data.name,
+        device: res.data.device,
+        device_number: res.data.device_number,
+      });
+      setModalAction({
+        titleModalAction: `Editar ${res.data.type} N° ${res.data.id_senasa}`,
+        handleClickConfirmAction: handleConfirmEdit,
+        rowID: row._id,
+      });
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleChangeForm = (e) => {
+    setTextForm((prevState) => {
+      return { ...prevState, [e.target.name]: e.target.value };
+    });
+  };
+
   const columns = [
     {
       id: 'id_senasa',
@@ -149,7 +217,7 @@ export default function Home() {
           id: 1,
           label: 'Editar',
           name: 'FiEdit',
-          function: handleOpenDialog,
+          function: handleClickEdit,
           type: 'fi',
           color: '#aec46e',
         },
@@ -195,18 +263,18 @@ export default function Home() {
     setSearchText(e.target.value);
   };
 
-  const handleClickSearch = () => {
-    console.log(searchText);
+  const handleClickSearch = async () => {
+    const body = {
+      body: searchText,
+    };
+    try {
+      const res = await getAnimalSearch(body);
+      console.log(res);
+    } catch (e) {
+      console.log(e);
+    }
     setSearchText('');
   };
-
-  const isSlice =
-    filters.rowsPerPage > 0
-      ? data.slice(
-          filters.page * filters.rowsPerPage,
-          filters.page * filters.rowsPerPage + filters.rowsPerPage
-        )
-      : data;
 
   const handleCloseSnackbar = () => {
     setSnackbar({ time: null, message: null, severity: null });
@@ -221,6 +289,49 @@ export default function Home() {
     });
   };
 
+  const handleCloseAction = () => {
+    setTextForm({
+      id_senasa: null,
+      type: '',
+      weight: null,
+      name: null,
+      device: '',
+      device_number: null,
+    });
+    setModalAction({
+      titleModalAction: null,
+      handleClickConfirmAction: null,
+      rowID: null,
+    });
+  };
+
+  const handleCreateBtn = () => {
+    setModalAction({
+      titleModalAction: 'Agregar nuevo animal',
+      handleClickConfirmAction: handleCreateAnimal,
+      rowID: null,
+    });
+  };
+
+  const handleCreateAnimal = async (rowID, body) => {
+    try {
+      await createAnimal(body);
+      await handleGetData(filters);
+      setSnackbar({
+        time: 3000,
+        message: 'El item se agregó con éxito',
+        severity: 'success',
+      });
+      handleCloseAction();
+    } catch (e) {
+      setSnackbar({
+        time: 3000,
+        message: e.message,
+        severity: 'error',
+      });
+    }
+  };
+
   return (
     <>
       <Grid container spacing={10}>
@@ -229,7 +340,7 @@ export default function Home() {
             path='Home'
             title=' Administración Ganadera'
             btnLabel='Crear nueva entrada'
-            handleClickBtn={null}
+            handleClickBtn={handleCreateBtn}
           />
         </Grid>
         <Grid item xs={12}>
@@ -263,7 +374,6 @@ export default function Home() {
             </Typography>
             <GeneralTable
               rows={data}
-              isSlice={data}
               columns={columns}
               rowsPerPage={filters.rowsPerPage}
               page={filters.page}
@@ -296,6 +406,15 @@ export default function Home() {
         secondaryText={dialogConfig.secondaryText}
         handleClose={handleCloseDialog}
         row={dialogConfig.row}
+      />
+      <ModalComponentAction
+        handleClose={handleCloseAction}
+        title={modalAction.titleModalAction}
+        handleClickConfirm={modalAction.handleClickConfirmAction}
+        columns={columns}
+        textForm={textForm}
+        handleChangeForm={handleChangeForm}
+        rowID={modalAction.rowID}
       />
     </>
   );

@@ -17,7 +17,7 @@ export async function createAnimal(body) {
   const response = await Axios(`${URL_CREATE_ANIMAL}`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
     body,
   });
@@ -26,7 +26,7 @@ export async function createAnimal(body) {
 
 export async function getAnimalById(id) {
   const response = await Axios(`${URL_ANIMAL}/${id}`, {
-    method: 'POST',
+    method: 'GET',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
@@ -48,20 +48,20 @@ export async function editAnimalById(id, body) {
   const response = await Axios(`${URL_ANIMAL}/${id}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
     body,
   });
   return response;
 }
 
-export async function getAnimalSearch(search) {
+export async function getAnimalSearch(body) {
   const response = await Axios(`${URL_ANIMAL}/search`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
-    body: { search },
+    body,
   });
   return response;
 }
