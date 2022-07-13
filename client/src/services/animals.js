@@ -5,8 +5,7 @@ export async function getAnimales(body, orderBy = null, order = null) {
   const response = await Axios(`${URL_ANIMAL}?sortBy=${orderBy}:${order}`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-      Autorization: '*',
+      'Content-Type': 'application/json',
     },
     body,
   });

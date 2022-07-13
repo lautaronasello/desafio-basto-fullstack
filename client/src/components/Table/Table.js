@@ -10,7 +10,7 @@ import { theme } from '../../utils/theme';
 import * as IconFi from 'react-icons/fi';
 import * as IconMui from '@mui/icons-material';
 
-import { IconButton, TablePagination, Tooltip } from '@mui/material';
+import { Box, IconButton, TablePagination, Tooltip } from '@mui/material';
 import TablePaginationActions from './TablePaginationActions';
 import moment from 'moment';
 import TableHeadComponent from './TableHeadComponent';
@@ -56,57 +56,65 @@ export default function GeneralTable(props) {
 
   return (
     <>
-      <TableContainer sx={{ maxHeight: '50vh' }}>
-        <Table stickyHeader sx={{ minWidth: 700 }}>
-          <TableHeadComponent
-            order={order}
-            orderBy={orderBy}
-            onRequestSort={handleRequestSort}
-            columns={columns}
+      {rows && rows.length === 0 ? (
+        <Box sx={{ mx: 'auto', my: '2rem' }}>
+          Ups, no hemos encontrado registros para esta busqueda!
+        </Box>
+      ) : (
+        <>
+          <TableContainer sx={{ maxHeight: '50vh' }}>
+            <Table stickyHeader sx={{ minWidth: 700 }}>
+              <TableHeadComponent
+                order={order}
+                orderBy={orderBy}
+                onRequestSort={handleRequestSort}
+                columns={columns}
+              />
+              <TableBody>
+                {rows &&
+                  rows.map((row) => {
+                    return (
+                      <TableRow key={row._id}>
+                        {columns.map((column) => {
+                          const value = row[column.id];
+                          return (
+                            <TableCell key={column.id}>
+                              {column.id === 'actions'
+                                ? CustomIcon(row, column.icons)
+                                : column.id === 'createdAt'
+                                ? moment(value).format('DD/MM/YYYY HH:mm:ss')
+                                : value}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[5, 10, 25, 50]}
+            labelRowsPerPage='Filas por pagina:'
+            count={totalRows}
+            component='div'
+            rowsPerPage={rowsPerPage}
+            page={page}
+            labelDisplayedRows={({ from, to, count }) => {
+              return '' + from + '-' + to + ' de ' + count;
+            }}
+            SelectProps={{
+              inputProps: {
+                'aria-label': 'Filas por página',
+              },
+              native: true,
+            }}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            ActionsComponent={TablePaginationActions}
           />
-          <TableBody>
-            {rows &&
-              rows.map((row) => {
-                return (
-                  <TableRow key={row._id}>
-                    {columns.map((column) => {
-                      const value = row[column.id];
-                      return (
-                        <TableCell key={column.id}>
-                          {column.id === 'actions'
-                            ? CustomIcon(row, column.icons)
-                            : column.id === 'createdAt'
-                            ? moment(value).format('DD/MM/YYYY HH:mm:ss')
-                            : value}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <TablePagination
-        rowsPerPageOptions={[5, 10, 25, 50]}
-        labelRowsPerPage='Filas por pagina:'
-        count={totalRows}
-        component='div'
-        rowsPerPage={rowsPerPage}
-        page={page}
-        labelDisplayedRows={({ from, to, count }) => {
-          return '' + from + '-' + to + ' de ' + count;
-        }}
-        SelectProps={{
-          inputProps: {
-            'aria-label': 'Filas por página',
-          },
-          native: true,
-        }}
-        onPageChange={handleChangePage}
-        onRowsPerPageChange={handleChangeRowsPerPage}
-        ActionsComponent={TablePaginationActions}
-      />
+        </>
+      )}
     </>
   );
 }

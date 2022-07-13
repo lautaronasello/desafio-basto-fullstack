@@ -58,10 +58,26 @@ export default function Home() {
     device_number: null,
     createdAt: null,
   });
+  //Need separate this state (page and rowsPerPage) for more customization
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   useEffect(() => {
     let isMounted = true;
 
+    if (isMounted) {
+      setPage(filters.page);
+      setRowsPerPage(filters.rowsPerPage);
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [filters.page, filters.rowsPerPage]);
+
+  //useEffect brings the data every time filters change
+  useEffect(() => {
+    let isMounted = true;
     if (isMounted) {
       handleGetData(filters);
     }
@@ -71,6 +87,7 @@ export default function Home() {
     };
   }, [filters]);
 
+  //getData Animals
   const handleGetData = async (filters) => {
     const body = {
       page: filters.page,
@@ -81,10 +98,15 @@ export default function Home() {
       setData(res.data.rows);
       setTotalRows(res.data.totalRows);
     } catch (e) {
-      console.log(e);
+      setSnackbar({
+        time: 3000,
+        message: e.message,
+        severity: 'error',
+      });
     }
   };
 
+  //Open dialog confirm
   const handleOpenDialog = (e, item, row) => {
     setDialogConfig({
       title: item.title,
@@ -104,6 +126,7 @@ export default function Home() {
         row: null,
       });
       await handleGetData(filters);
+      setPage(0);
       setSnackbar({
         time: 3000,
         message: 'El item se elimino con exito',
@@ -118,6 +141,7 @@ export default function Home() {
     }
   };
 
+  //confirm the edit on dialog btn confirm
   const handleConfirmEdit = async (rowID, body) => {
     try {
       await editAnimalById(rowID, body);
@@ -128,6 +152,7 @@ export default function Home() {
         severity: 'success',
       });
       handleCloseAction();
+      setPage(0);
     } catch (e) {
       setSnackbar({
         time: 3000,
@@ -137,6 +162,7 @@ export default function Home() {
     }
   };
 
+  //Open Modal edit and bring animal selected info
   const handleClickEdit = async (e, item, row) => {
     try {
       const res = await getAnimalById(row._id);
@@ -154,16 +180,22 @@ export default function Home() {
         rowID: row._id,
       });
     } catch (e) {
-      console.log(e);
+      setSnackbar({
+        time: 3000,
+        message: e.message,
+        severity: 'error',
+      });
     }
   };
 
+  //Form control
   const handleChangeForm = (e) => {
     setTextForm((prevState) => {
       return { ...prevState, [e.target.name]: e.target.value };
     });
   };
 
+  //Columns for the tableGeneral
   const columns = [
     {
       id: 'id_senasa',
@@ -237,6 +269,7 @@ export default function Home() {
     },
   ];
 
+  //Set order and orderBy filters
   const handleRequestSort = (event, property) => {
     const isAsc = filters.orderBy === property && filters.order === 'asc';
     setFilters((prevState) => {
@@ -244,12 +277,14 @@ export default function Home() {
     });
   };
 
+  //Handle page changes
   const handleChangePage = (event, newPage) => {
     setFilters((prevState) => {
       return { ...prevState, page: newPage };
     });
   };
 
+  //Handle RowsPerPage Changes
   const handleChangeRowsPerPage = (event) => {
     setFilters((prevState) => {
       return {
@@ -264,14 +299,17 @@ export default function Home() {
     setSearchText(e.target.value);
   };
 
+  //Handle general search only with strings
   const handleClickSearch = async () => {
     const body = {
       body: searchText,
     };
     try {
       const res = await getAnimalSearch(body);
-      setData(res.data);
+      setData(res.data.rows);
       setChipLabel(searchText);
+      setTotalRows(res.data.totalRows);
+      setPage(0);
     } catch (e) {
       setSnackbar({
         time: 3000,
@@ -311,6 +349,7 @@ export default function Home() {
     });
   };
 
+  //Open create animal modal
   const handleCreateBtn = () => {
     setModalAction({
       titleModalAction: 'Agregar nuevo animal',
@@ -319,6 +358,7 @@ export default function Home() {
     });
   };
 
+  //confirm btn create animal
   const handleCreateAnimal = async (rowID, body) => {
     try {
       await createAnimal(body);
@@ -329,6 +369,7 @@ export default function Home() {
         severity: 'success',
       });
       handleCloseAction();
+      setPage(0);
     } catch (e) {
       setSnackbar({
         time: 3000,
@@ -338,9 +379,13 @@ export default function Home() {
     }
   };
 
+  //Delete chips filter and search filter
   const handleDeleteFilter = async () => {
     setChipLabel(null);
     await handleGetData(filters);
+    setFilters((prevState) => {
+      return { ...prevState, page: 0 };
+    });
   };
 
   return (
@@ -396,8 +441,8 @@ export default function Home() {
             <GeneralTable
               rows={data}
               columns={columns}
-              rowsPerPage={filters.rowsPerPage}
-              page={filters.page}
+              rowsPerPage={rowsPerPage}
+              page={page}
               handleChangePage={handleChangePage}
               handleChangeRowsPerPage={handleChangeRowsPerPage}
               handleRequestSort={handleRequestSort}

@@ -5,6 +5,7 @@ export const getAnimals = async (req, res) => {
   try {
     let sort = {};
     if (req.query.sortBy) {
+      //Divides query on column and orderBy
       const str = req.query.sortBy.split(':');
       if (str[0] !== 'null') {
         sort[str[0]] = str[1] === 'desc' ? -1 : 1;
@@ -12,12 +13,14 @@ export const getAnimals = async (req, res) => {
         sort = { createdAt: -1 };
       }
     }
+    //Filters by active animals
     const animals = await Animal.find({ is_active: true })
       .sort(sort)
       .skip(page * rowsPerPage)
       .limit(rowsPerPage);
 
-    const totalAnimals = await Animal.find();
+    //Brings all animals for total rows pagination
+    const totalAnimals = await Animal.find({ is_active: true });
 
     const response = {
       rowsPerPage,
@@ -39,8 +42,27 @@ export const getAnimals = async (req, res) => {
   }
 };
 
+export const getAnimalSearch = async (req, res) => {
+  const search = req.body.body;
+  try {
+    const requestedAnimal = await Animal.find(
+      { $text: { $search: search } },
+      { score: { $meta: 'textScore' } }
+    );
+    if (!requestedAnimal) return res.status(204).json([]);
+    const response = {
+      totalRows: requestedAnimal.length,
+      rows: requestedAnimal,
+    };
+    res.status(200).json(response);
+  } catch (e) {
+    res.json(e);
+  }
+};
+
 export const createAnimal = async (req, res, next) => {
   const typeAnimal = req.body.type;
+  //Change animal type to format needed
   const typeAnimalFormatted =
     typeAnimal.charAt(0).toUpperCase() + typeAnimal.slice(1);
   const requestBody = {
@@ -62,6 +84,7 @@ export const deleteAnimal = async (req, res) => {
   try {
     const deletedAnimal = await Animal.findByIdAndUpdate(
       req.params.id,
+      //Logic delete
       { is_active: false },
       {
         new: true,
@@ -98,6 +121,7 @@ export const editAnimals = async (req, res, next) => {
     res.json(e.message);
   }
 };
+
 export const getAnimalById = async (req, res) => {
   try {
     const requestedAnimal = await Animal.findById(req.params.id);
@@ -105,19 +129,5 @@ export const getAnimalById = async (req, res) => {
     res.status(200).json(requestedAnimal);
   } catch (e) {
     res.json(e.message);
-  }
-};
-
-export const getAnimalSearch = async (req, res) => {
-  const search = req.body.body;
-  try {
-    const requestedAnimal = await Animal.find(
-      { $text: { $search: search } },
-      { score: { $meta: 'textScore' } }
-    );
-    if (!requestedAnimal) return res.status(204).json([]);
-    res.status(200).json(requestedAnimal);
-  } catch (e) {
-    res.json(e);
   }
 };
