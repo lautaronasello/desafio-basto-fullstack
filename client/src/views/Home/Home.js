@@ -1,9 +1,9 @@
 import {
   Alert,
   Button,
+  Chip,
   Grid,
   Snackbar,
-  snackbarClasses,
   Stack,
   TextField,
   Typography,
@@ -24,6 +24,7 @@ import {
 
 export default function Home() {
   const [searchText, setSearchText] = useState('');
+  const [chipLabel, setChipLabel] = useState(null);
   const [filters, setFilters] = useState({
     page: 0,
     rowsPerPage: 5,
@@ -269,9 +270,14 @@ export default function Home() {
     };
     try {
       const res = await getAnimalSearch(body);
-      console.log(res);
+      setData(res.data);
+      setChipLabel(searchText);
     } catch (e) {
-      console.log(e);
+      setSnackbar({
+        time: 3000,
+        message: e.message,
+        severity: 'error',
+      });
     }
     setSearchText('');
   };
@@ -332,6 +338,11 @@ export default function Home() {
     }
   };
 
+  const handleDeleteFilter = async () => {
+    setChipLabel(null);
+    await handleGetData(filters);
+  };
+
   return (
     <>
       <Grid container spacing={10}>
@@ -369,9 +380,19 @@ export default function Home() {
         </Grid>
         <Grid item xs={12}>
           <Stack direction='column' spacing={3}>
-            <Typography variant='h5' component='div'>
-              Lista de animales
-            </Typography>
+            <Stack direction='row' spacing={5}>
+              <Typography variant='h5' component='div'>
+                Lista de animales
+              </Typography>
+              {chipLabel && (
+                <Chip
+                  label={chipLabel}
+                  variant='outlined'
+                  color='primary'
+                  onDelete={handleDeleteFilter}
+                />
+              )}
+            </Stack>
             <GeneralTable
               rows={data}
               columns={columns}

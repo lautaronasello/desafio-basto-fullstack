@@ -110,7 +110,6 @@ export const getAnimalById = async (req, res) => {
 
 export const getAnimalSearch = async (req, res) => {
   const search = req.body.body;
-  console.log(search);
   try {
     const requestedAnimal = await Animal.find(
       { $text: { $search: search } },
