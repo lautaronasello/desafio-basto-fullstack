@@ -1,6 +1,7 @@
 import Animal from '../../../database/schemas/animal.schema.js';
 
 export const getAnimals = async (req, res) => {
+  console.log(req);
   const { page, rowsPerPage, orderBy, order } = req.body;
   try {
     let sort = {};
