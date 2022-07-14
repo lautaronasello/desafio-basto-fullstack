@@ -43,7 +43,7 @@ export const getAnimals = async (req, res) => {
 };
 
 export const getAnimalSearch = async (req, res) => {
-  const search = req.body.body;
+  const search = req.body.search;
   try {
     const requestedAnimal = await Animal.find(
       { $text: { $search: search } },
