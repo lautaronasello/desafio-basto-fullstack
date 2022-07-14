@@ -1,7 +1,6 @@
 import Animal from '../../../database/schemas/animal.schema.js';
 
 export const getAnimals = async (req, res) => {
-  console.log(req);
   const { page, rowsPerPage, orderBy, order } = req.body;
   try {
     let sort = {};
@@ -127,7 +126,7 @@ export const getAnimalById = async (req, res) => {
   try {
     const requestedAnimal = await Animal.findById(req.params.id);
     if (!requestedAnimal) return res.status(204).json([]);
-    res.status(200).json(requestedAnimal);
+    res.send(requestedAnimal);
   } catch (e) {
     res.json(e.message);
   }
