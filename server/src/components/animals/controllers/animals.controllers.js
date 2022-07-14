@@ -84,17 +84,17 @@ export const deleteAnimal = async (req, res) => {
   try {
     const deletedAnimal = await Animal.findByIdAndUpdate(
       req.params.id,
-      //Logic delete
       { is_active: false },
       {
         new: true,
       }
     );
+
     if (!deletedAnimal) return res.status(204).json();
 
     res.status(200).json(deletedAnimal);
   } catch (e) {
-    res.json(e);
+    res.json(e.message);
   }
 };
 
