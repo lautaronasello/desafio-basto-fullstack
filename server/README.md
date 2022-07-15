@@ -27,7 +27,7 @@ Clone command:
 
 ```bash
 cd your_folder
-git clone [desafio-basto-fullstack](https://github.com/lautaronasello/desafio-basto-fullstack.git)
+git clone https://github.com/lautaronasello/desafio-basto-fullstack.git
 
 ```
 
