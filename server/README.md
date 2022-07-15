@@ -1,50 +1,52 @@
 # ...BASTO SERVER ANIMALS...
 
-Este es el back-end del sistema de Basto-Animals.
-Acá se conecta la base de datos basto-digitalizacion.
+This is the back-end of the Basto-Animals system. Here the basto-digitization database is connected.
 
-## Contenido
+## Content
 
-Back-End controlador de usuario y noticias.
-El proyecto esta realizado en:
+Back-End user controller and news. The project is carried out in:
 
 - [Node.js](https://nodejs.org/es/)
 
-## Programas necesarios
+Using the non-relational database called:
 
-Para poder utilizar el proyecto en localhost en necesario clonarlo y tener algunos programas necesarios:
+- [MongoDB](https://www.mongodb.com/es)
 
-- [Nodejs](https://nodejs.org/es/download/) v12.18.0 o Superior.
-- IDE de desarrollo de tu comodidad Ej. [VS Code](https://code.visualstudio.com/download)
-- [PostMan](https://www.postman.com/downloads/) para puebas de APIS. (Opcional)
-- [Git](https://git-scm.com/downloads) para poder gestionar las versiones.
+## Required programs
 
-## Como Clonar
+To be able to use the project in localhost you need to clone it and have some necessary programs:
 
-Comando para clonar:
+- [Nodejs](https://nodejs.org/es/download/) v12.18.0 or more.
+- IDE of development of your comfort Eg. [VS Code](https://code.visualstudio.com/download)
+- [PostMan](https://www.postman.com/downloads/) for using APIS. (Opcional)
+- [Git](https://git-scm.com/downloads) to be able to manage the versions.
+
+## How to Clone
+
+Clone command:
 
 ```bash
-cd existing_folder
+cd your_folder
 git clone [desafio-basto-fullstack](https://github.com/lautaronasello/desafio-basto-fullstack.git)
 
 ```
 
-## Intalación
+## Installation
 
-Ya clonado el proyecto es necesario instalar todas las dependencias con el comando:
+Once the project has been cloned, it is necessary to install all the dependencies with the command:
 
 ```bash
 npm install
 ```
 
-### Run en LocalHost:
+### Run on LocalHost:
 
 ```bash
 npm run dev
 ```
 
-Este a su vez ejecutara nodemon app.js, el cual ayudará a la funcionalidad de pruebas y dev.
+This in turn will run nodemon app.js, which will help the testing and dev functionality.
 
 ### Autor
 
-Desarrollo realizado por [Lautaro Nasello](https://www.linkedin.com/in/lautaronasello/)
+Development carried out by [Lautaro Nasello](https://www.linkedin.com/in/lautaronasello/)
