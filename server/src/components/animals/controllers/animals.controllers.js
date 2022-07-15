@@ -1,10 +1,11 @@
-import Animal from '../schemas/animal.schema.js';
+import Animal from '../../../database/schemas/animal.schema.js';
 
 export const getAnimals = async (req, res) => {
   const { page, rowsPerPage, orderBy, order } = req.body;
   try {
     let sort = {};
     if (req.query.sortBy) {
+      //Divides query on column and orderBy
       const str = req.query.sortBy.split(':');
       if (str[0] !== 'null') {
         sort[str[0]] = str[1] === 'desc' ? -1 : 1;
@@ -12,28 +13,56 @@ export const getAnimals = async (req, res) => {
         sort = { createdAt: -1 };
       }
     }
+    //Filters by active animals
     const animals = await Animal.find({ is_active: true })
       .sort(sort)
       .skip(page * rowsPerPage)
       .limit(rowsPerPage);
+
+    //Brings all animals for total rows pagination
+    const totalAnimals = await Animal.find({ is_active: true });
 
     const response = {
       rowsPerPage,
       page: page + 1,
       orderBy,
       order,
-      data: animals,
+      totalRows: totalAnimals.length,
+      rows: animals,
     };
-
     if (!response) return res.status(204).json();
 
     res.status(200).json(response);
   } catch (e) {
-    res.json(e.message);
+    if ((e.name = 'ValidatorError')) {
+      res.status(409).json(e.message);
+    } else {
+      res.status(500).json(e);
+    }
   }
 };
-export const createAnimal = async (req, res) => {
+
+export const getAnimalSearch = async (req, res) => {
+  const search = req.body.search;
+  try {
+    const requestedAnimal = await Animal.find(
+      { $text: { $search: search } },
+      { score: { $meta: 'textScore' } }
+    );
+    if (!requestedAnimal) return res.status(204).json([]);
+    const response = {
+      totalRows: requestedAnimal.length,
+      rows: requestedAnimal,
+    };
+    res.status(200).json(response);
+  } catch (e) {
+    res.json(e);
+  }
+};
+
+export const createAnimal = async (req, res, next) => {
   const typeAnimal = req.body.type;
+  //Change animal type to format needed
   const typeAnimalFormatted =
     typeAnimal.charAt(0).toUpperCase() + typeAnimal.slice(1);
   const requestBody = {
@@ -47,7 +76,7 @@ export const createAnimal = async (req, res) => {
     const savedAnimal = await newAnimal.save();
     res.status(200).json(savedAnimal);
   } catch (e) {
-    res.json(e.message);
+    res.status(500).json(e);
   }
 };
 
@@ -60,6 +89,7 @@ export const deleteAnimal = async (req, res) => {
         new: true,
       }
     );
+
     if (!deletedAnimal) return res.status(204).json();
 
     res.status(200).json(deletedAnimal);
@@ -68,27 +98,35 @@ export const deleteAnimal = async (req, res) => {
   }
 };
 
-export const editAnimals = async (req, res) => {
+export const editAnimals = async (req, res, next) => {
   try {
-    const updatedAnimal = await Animal.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      {
-        new: true,
-      }
-    );
-    if (!updatedAnimal) return res.status(204).json();
-    res.status(200).json(updatedAnimal);
+    if (
+      req.body.id_senasa.length !== 16 ||
+      req.body.device_number.length !== 8 ||
+      req.body.name.length > 200
+    ) {
+      throw new Error('Error validación cantidad de caracteres');
+    } else {
+      const updatedAnimal = await Animal.findByIdAndUpdate(
+        req.params.id,
+        req.body,
+        {
+          new: true,
+        }
+      );
+      if (!updatedAnimal) return res.status(204).json();
+      res.status(200).json(updatedAnimal);
+    }
   } catch (e) {
     res.json(e.message);
   }
 };
+
 export const getAnimalById = async (req, res) => {
-  const change = req.body;
   try {
     const requestedAnimal = await Animal.findById(req.params.id);
-    if (!requestedAnimal) return res.status(204).json();
-    res.status(200).json(requestedAnimal);
+    if (!requestedAnimal) return res.status(204).json([]);
+    res.send(requestedAnimal);
   } catch (e) {
     res.json(e.message);
   }

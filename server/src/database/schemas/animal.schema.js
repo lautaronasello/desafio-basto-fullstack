@@ -15,6 +15,7 @@ const animalSchema = new Schema(
         'La cantidad exacta de caracteres debe ser 16 (dieciséis)',
       ],
       unique: true,
+      index: true,
     },
     type: {
       type: String,
@@ -24,6 +25,7 @@ const animalSchema = new Schema(
           '{VALUE} no es compatible. El valor debe ser "Novillo","Toro" o "Vaquillona".',
       },
       required: [true, 'El campo type es requerido'],
+      index: true,
     },
     weight: {
       type: Number,
@@ -33,6 +35,7 @@ const animalSchema = new Schema(
       type: String,
       maxLength: [200, 'La cantidad máxima de caracteres es 200 (doscientos)'],
       required: [true, 'El campo name es requerido'],
+      index: true,
     },
     device: {
       type: String,
@@ -42,12 +45,14 @@ const animalSchema = new Schema(
           '{VALUE} no es compatible. El valor debe ser "COLLAR" o "CARAVANA".',
       },
       required: [true, 'El campo device es requerido'],
+      index: true,
     },
     device_number: {
       type: String,
       minLength: [8, 'La cantidad exacta de caracteres debe ser 8 (ocho)'],
       maxLength: [8, 'La cantidad exacta de caracteres debe ser 8 (ocho)'],
       required: [true, 'El campo device_number es requerido'],
+      index: true,
     },
     is_active: {
       type: Boolean,
@@ -61,5 +66,11 @@ const animalSchema = new Schema(
 );
 
 animalSchema.plugin(uniqueValidator);
+animalSchema.methods.toJSON = function () {
+  var obj = this.toObject();
+  delete obj.is_active;
+  return obj;
+};
+animalSchema.index({ '$**': 'text' }, { name: 'textScore' });
 
 export default model('Animal', animalSchema);

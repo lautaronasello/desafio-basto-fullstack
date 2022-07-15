@@ -4,7 +4,7 @@ import config from './config.js';
 export async function connectDB() {
   try {
     const db = await mongoose.connect(
-      `mongodb://localhost:27017/${config.MONGO_DATABASE}`
+      `mongodb://${config.MONGO_HOST}:${config.MONGO_PORT}/${config.MONGO_DATABASE}`
     );
   } catch (e) {
     console.log(e);
