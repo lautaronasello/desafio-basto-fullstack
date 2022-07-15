@@ -1,12 +1,9 @@
 import * as React from 'react';
-import { styled } from '@mui/material/styles';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { theme } from '../../utils/theme';
 import * as IconFi from 'react-icons/fi';
 import * as IconMui from '@mui/icons-material';
 
@@ -29,6 +26,7 @@ export default function GeneralTable(props) {
     totalRows,
   } = props;
 
+  //This function returns the icon passed on the column.action array
   const CustomIcon = (row, icons) => {
     return (
       <>
