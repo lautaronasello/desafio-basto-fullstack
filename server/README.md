@@ -47,6 +47,14 @@ npm run dev
 
 This in turn will run nodemon app.js, which will help the testing and dev functionality.
 
+### Test with Jest and supertest:
+
+```bash
+npm test
+```
+
+This in turn will run nodemon app.js, which will help the testing and dev functionality.
+
 ### Autor
 
 Development carried out by [Lautaro Nasello](https://www.linkedin.com/in/lautaronasello/)
