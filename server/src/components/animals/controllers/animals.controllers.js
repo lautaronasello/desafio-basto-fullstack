@@ -42,13 +42,14 @@ export const getAnimals = async (req, res) => {
   }
 };
 
+//Search coincidences and sort by the best coincidence
 export const getAnimalSearch = async (req, res) => {
   const search = req.body.search;
   try {
     const requestedAnimal = await Animal.find(
       { $text: { $search: search } },
       { score: { $meta: 'textScore' } }
-    );
+    ).sort({ score: { $meta: 'textScore' } });
     if (!requestedAnimal) return res.status(204).json([]);
     const response = {
       totalRows: requestedAnimal.length,
