@@ -50,7 +50,7 @@ This in turn will run nodemon app.js, which will help the testing and dev functi
 ### Test with Jest and supertest:
 
 ```bash
-npm test
+npm run test
 ```
 
 This in turn will run nodemon app.js, which will help the testing and dev functionality.
