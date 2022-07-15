@@ -28,7 +28,7 @@ export default function Home() {
   const [filters, setFilters] = useState({
     page: 0,
     rowsPerPage: 5,
-    orderBy: null,
+    orderBy: 'createdAt',
     order: 'desc',
   });
   const [data, setData] = useState([]);
@@ -302,7 +302,7 @@ export default function Home() {
   //Handle general search only with strings
   const handleClickSearch = async () => {
     const body = {
-      body: searchText,
+      search: searchText,
     };
     try {
       const res = await getAnimalSearch(body);
@@ -447,6 +447,8 @@ export default function Home() {
               handleChangeRowsPerPage={handleChangeRowsPerPage}
               handleRequestSort={handleRequestSort}
               totalRows={totalRows}
+              orderBy={filters.orderBy}
+              order={filters.order}
             />
           </Stack>
         </Grid>
